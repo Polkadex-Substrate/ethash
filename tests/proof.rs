@@ -1,7 +1,7 @@
 use byteorder::ByteOrder;
 use ethash::mtree::{Hash, Word};
 use ethash::types;
-use ethereum_types::H256;
+use primitive_types::H256;
 
 // this test is used as a playground
 #[test]

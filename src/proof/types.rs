@@ -1,7 +1,8 @@
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
-use ethereum_types::{Address, Bloom, H256, H64, U256};
+use ethereum_types::{Address, Bloom, H64};
+use primitive_types::{H256, U256};
 use rlp::{Rlp, RlpStream};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]

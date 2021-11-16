@@ -2,7 +2,8 @@
 use alloc::{vec, vec::Vec};
 
 use core::marker::PhantomData;
-use ethereum_types::{H256, H64, U256};
+use ethereum_types::H64;
+use primitive_types::{H256, U256};
 
 pub trait Patch {
     fn epoch_length() -> U256;

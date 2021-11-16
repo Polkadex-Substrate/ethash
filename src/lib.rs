@@ -19,8 +19,9 @@ pub use dag::{EthereumPatch, LightDAG, Patch};
 use core::ops::BitXor;
 
 use byteorder::{ByteOrder, LittleEndian};
-use ethereum_types::{BigEndianHash, H256, H512, H64, U256, U64};
+use ethereum_types::{BigEndianHash, H64, U64};
 use miller_rabin::is_prime;
+use primitive_types::{H256, H512, U256};
 use rlp::Encodable;
 use sha3::{Digest, Keccak256, Keccak512};
 
@@ -401,7 +402,8 @@ pub fn get_seedhash(epoch: usize) -> H256 {
 #[cfg(test)]
 mod tests {
     use crate::{EthereumPatch, LightDAG};
-    use ethereum_types::{H256, H64};
+    use ethereum_types::H64;
+    use primitive_types::H256;
 
     #[test]
     fn hashimoto_should_work() {

@@ -3,7 +3,8 @@ use alloc::{format, vec::Vec};
 
 use byteorder::ByteOrder;
 use byteorder::LittleEndian;
-use ethereum_types::{H128, H256, H64};
+use ethereum_types::H64;
+use primitive_types::{H128, H256};
 use tiny_keccak::{Hasher, Keccak};
 
 use crate::ACCESSES;

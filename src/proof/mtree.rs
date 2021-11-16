@@ -4,8 +4,8 @@ use core::ops::Deref;
 #[cfg(not(feature = "std"))]
 use alloc::{boxed::Box, vec, vec::Vec};
 
-use ethereum_types::H256;
 use lazy_static::lazy_static;
+use primitive_types::H256;
 use sha2::Digest;
 
 const HASH_LENGTH: usize = 16; // bytes.
