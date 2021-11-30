@@ -23,7 +23,7 @@ use ethereum_types::{BigEndianHash, H256, H512, H64, U256, U64};
 use miller_rabin::is_prime;
 use rlp::{Encodable, Rlp};
 use sha3::{Digest, Keccak256, Keccak512};
-use snowbridge_ethereum::Header;
+pub use snowbridge_ethereum::Header;
 
 pub const DATASET_BYTES_INIT: usize = 1073741824; // 2 to the power of 30.
 pub const DATASET_BYTES_GROWTH: usize = 8388608; // 2 to the power of 23.
