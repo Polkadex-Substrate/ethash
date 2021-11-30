@@ -1,15 +1,17 @@
 use byteorder::ByteOrder;
+use ethash::decode_rlp_block_header;
 use ethash::mtree::{Hash, Word};
-use ethash::types;
-use primitive_types::H256;
+use ethereum_types::H256;
+use rlp::Rlp;
 
 // this test is used as a playground
 #[test]
 fn proofs() {
     let rlp_encoded_str = include_str!("fixtures/2.rlp");
     let rlp_encoded = hex::decode(rlp_encoded_str.trim()).unwrap();
-    let header: types::BlockHeader = rlp::decode(&rlp_encoded).unwrap();
-    let header_hash = header.seal_hash();
+    let header: snowbridge_ethereum::Header =
+        decode_rlp_block_header(&Rlp::new(&rlp_encoded)).unwrap();
+    let header_hash = header.compute_partial_hash();
     assert_eq!(
         header_hash.as_bytes(),
         hex::decode(
@@ -19,7 +21,8 @@ fn proofs() {
     );
 
     let dag = ethash::LightDAG::<ethash::EthereumPatch>::new(header.number);
-    let (mix_hash, result) = dag.hashimoto(header_hash, header.nonce);
+    let (mix_hash, result) =
+        dag.hashimoto(header_hash, header.nonce().unwrap());
     assert_eq!(
         result.as_bytes(),
         hex::decode(
@@ -27,17 +30,21 @@ fn proofs() {
         )
         .unwrap()
     );
-    assert_eq!(mix_hash, header.mix_hash);
+    assert_eq!(mix_hash, header.mix_hash().unwrap());
 
-    let indices =
-        ethash::get_indices(header_hash, header.nonce, dag.full_size, |i| {
+    let indices = ethash::get_indices(
+        header_hash,
+        header.nonce().unwrap(),
+        dag.full_size,
+        |i| {
             let raw_data = ethash::calc_dataset_item(&dag.cache, i);
             let mut data = [0u32; 16];
             for (i, b) in data.iter_mut().enumerate() {
                 *b = byteorder::LE::read_u32(&raw_data[(i * 4)..]);
             }
             data
-        });
+        },
+    );
 
     assert_eq!(
         indices,
@@ -156,20 +163,24 @@ fn proofs() {
 fn mix_hash_2() {
     let rlp_encoded_str = include_str!("fixtures/2.rlp");
     let rlp_encoded = hex::decode(rlp_encoded_str.trim()).unwrap();
-    let header: types::BlockHeader = rlp::decode(&rlp_encoded).unwrap();
+    let header: snowbridge_ethereum::Header =
+        decode_rlp_block_header(&Rlp::new(&rlp_encoded)).unwrap();
     dbg!(&header);
     let dag = ethash::LightDAG::<ethash::EthereumPatch>::new(header.number);
-    let (mix_hash, _) = dag.hashimoto(header.seal_hash(), header.nonce);
-    assert_eq!(mix_hash, header.mix_hash);
+    let (mix_hash, _) =
+        dag.hashimoto(header.compute_partial_hash(), header.nonce().unwrap());
+    assert_eq!(mix_hash, header.mix_hash().unwrap());
 }
 
 #[test]
 fn mix_hash_10234011() {
     let rlp_encoded_str = include_str!("fixtures/10234011.rlp");
     let rlp_encoded = hex::decode(rlp_encoded_str.trim()).unwrap();
-    let header: types::BlockHeader = rlp::decode(&rlp_encoded).unwrap();
+    let header: snowbridge_ethereum::Header =
+        decode_rlp_block_header(&Rlp::new(&rlp_encoded)).unwrap();
     dbg!(&header);
     let dag = ethash::LightDAG::<ethash::EthereumPatch>::new(header.number);
-    let (mix_hash, _) = dag.hashimoto(header.seal_hash(), header.nonce);
-    assert_eq!(mix_hash, header.mix_hash);
+    let (mix_hash, _) =
+        dag.hashimoto(header.compute_partial_hash(), header.nonce().unwrap());
+    assert_eq!(mix_hash, header.mix_hash().unwrap());
 }

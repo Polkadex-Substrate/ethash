@@ -3,8 +3,7 @@ use alloc::{format, vec::Vec};
 
 use byteorder::ByteOrder;
 use byteorder::LittleEndian;
-use ethereum_types::H64;
-use primitive_types::{H128, H256};
+use ethereum_types::{H128, H256, H64};
 use tiny_keccak::{Hasher, Keccak};
 
 use crate::ACCESSES;
@@ -16,7 +15,6 @@ pub const WORD_LENGTH: usize = 128;
 pub const BRANCH_ELEMENT_LENGTH: usize = 32;
 
 pub mod mtree;
-pub mod types;
 
 pub fn keccak_512(data: &[u8]) -> [u8; 64] {
     let mut keccak = Keccak::v512();

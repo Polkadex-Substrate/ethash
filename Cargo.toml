@@ -7,9 +7,9 @@ license = "Apache-2.0"
 edition = "2018"
 
 [dependencies]
-ethereum-types = { version = "0.12", default-features = false, features = ["rlp"] }
-primitive-types = {version="0.10.1", default-features = false, features = ["rlp"]}
-rlp = { version = "0.5.1", default-features = false }
+snowbridge-ethereum = {git="https://github.com/Snowfork/snowbridge.git", branch="main",default-features = false}
+ethereum-types = { version = "0.12", default-features = false }
+rlp = { version = "0.5", default-features = false }
 byteorder = { version = "1", default-features = false }
 sha3 = { version = "0.8", default-features = false }
 sha2 = { version = "0.8", default-features = false, optional = true }
@@ -34,6 +34,7 @@ withproofs = [
   "lazy_static",
 ]
 std = [
+  "snowbridge-ethereum/std",
   "ethereum-types/std",
   "rlp/std",
   "byteorder/std",

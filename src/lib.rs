@@ -19,11 +19,11 @@ pub use dag::{EthereumPatch, LightDAG, Patch};
 use core::ops::BitXor;
 
 use byteorder::{ByteOrder, LittleEndian};
-use ethereum_types::{BigEndianHash, H64, U64};
+use ethereum_types::{BigEndianHash, H256, H512, H64, U256, U64};
 use miller_rabin::is_prime;
-use primitive_types::{H256, H512, U256};
-use rlp::Encodable;
+use rlp::{Encodable, Rlp};
 use sha3::{Digest, Keccak256, Keccak512};
+use snowbridge_ethereum::Header;
 
 pub const DATASET_BYTES_INIT: usize = 1073741824; // 2 to the power of 30.
 pub const DATASET_BYTES_GROWTH: usize = 8388608; // 2 to the power of 23.
@@ -399,16 +399,51 @@ pub fn get_seedhash(epoch: usize) -> H256 {
     H256::from_slice(s.as_ref())
 }
 
+pub const LONDONFORKBLOCK: u64 = 12965000u64;
+
+// Based on https://github.com/openethereum/openethereum/blob/193b25a22d5ff07759c6431129e95235510516f9/crates/ethcore/types/src/header.rs#L392
+pub fn decode_rlp_block_header(r: &Rlp) -> Result<Header, rlp::DecoderError> {
+    let mut blockheader = Header {
+        parent_hash: r.val_at(0)?,
+        ommers_hash: r.val_at(1)?,
+        author: r.val_at(2)?,
+        state_root: r.val_at(3)?,
+        transactions_root: r.val_at(4)?,
+        receipts_root: r.val_at(5)?,
+        logs_bloom: r.val_at(6)?,
+        difficulty: r.val_at(7)?,
+        number: r.val_at(8)?,
+        gas_limit: r.val_at(9)?,
+        gas_used: r.val_at(10)?,
+        timestamp: r.val_at(11)?,
+        extra_data: r.val_at(12)?,
+        seal: vec![],
+        base_fee: None,
+    };
+
+    if blockheader.number >= LONDONFORKBLOCK {
+        for i in 13..r.item_count()? - 1 {
+            blockheader.seal.push(r.at(i)?.as_raw().to_vec())
+        }
+        blockheader.base_fee = Some(r.val_at(r.item_count()? - 1)?);
+    } else {
+        for i in 13..r.item_count()? {
+            blockheader.seal.push(r.at(i)?.as_raw().to_vec())
+        }
+    }
+
+    Ok(blockheader)
+}
+
 #[cfg(test)]
 mod tests {
     use crate::{EthereumPatch, LightDAG};
-    use ethereum_types::H64;
-    use primitive_types::H256;
+    use ethereum_types::{H256, H64};
 
     #[test]
     fn hashimoto_should_work() {
         type DAG = LightDAG<EthereumPatch>;
-        let light_dag = DAG::new(0x8947a9.into());
+        let light_dag = DAG::new(0x8947a9u64.into());
         // bare_hash of block#8996777 on ethereum mainnet
         let partial_header_hash = H256::from_slice(&hex::decode(
             "3c2e6623b1de8862a927eeeef2b6b25dea6e1d9dad88dca3c239be3959dc384a"
